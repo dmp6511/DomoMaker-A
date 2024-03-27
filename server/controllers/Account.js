@@ -10,7 +10,9 @@ const signupPage = (req, res) => {
     return res.render('signup');
 };
 
+// logout function
 const logout = (req, res) => {
+    req.session.destroy();
     return res.redirect('/');
 };
 
@@ -29,8 +31,12 @@ const login = (req, res) => {
         if (err || !account) {
             return res.status(401).json({ error: 'Wrong username or password!' });
         }
+        // set the user's session
+        req.session.account = Account.toAPI(account);
+
         return res.json({ redirect: '/maker' });
     });
+
 };
 
 
@@ -58,6 +64,7 @@ const signup = async (req, res) => {
         // create a new account
         const newAccount = new Account({username, password: hash});
         await newAccount.save(); // save the account
+        req.session.account = Account.toAPI(newAccount); // set the user's session
         return res.json({ redirect: '/maker' });
     } catch (err) {
         // in case of the username already existing
